@@ -7,7 +7,7 @@ const __dirname = dirname(__filename)
 
 export default defineConfig({
   // ✅ ใช้ base แทน basename และต้องตรงกับ Router basename
-  base: '/datahub/bcc-pyo/public',
+  base: '/datahub/flood-pyo/public',
   build: {
     outDir: resolve(__dirname, '../public'),
     emptyOutDir: true,

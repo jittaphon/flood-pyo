@@ -10,7 +10,6 @@ export default function MainLayout() {
   const isHome = location.pathname === "/"; // หรือ "/home" ถ้า path เป็นแบบนั้น
   return (
     <div className="flex flex-col min-h-screen">
-      <NavBar />
 
       <div className="flex flex-1 overflow-hidden">
    
