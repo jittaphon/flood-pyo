@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import React from "react";
 import Papa from 'papaparse';
 import { motion } from "framer-motion";
+import StatCard from "../components/StatCard"; // 👈 import ที่ทำไว้ด้านบน
 
 export default function HomePage() {
   const [rawData, setRawData] = useState([]);
@@ -130,7 +131,32 @@ const mappedData = processedData.map(row => {
   }
   return newRow;
 });
-  console.log('Mapped Data:', mappedData);
+
+// ✅ รวมค่าทุกอำเภอทั้ง วันนี้ + สะสม
+const totals = mappedData.reduce(
+  (acc, row) => {
+    acc.dead.today += Number(row["เสียชีวิตวันนี้"] || 0);
+    acc.dead.total += Number(row["เสียชีวิตสะสม"] || 0);
+
+    acc.missing.today += Number(row["สูญหายวันนี้"] || 0);
+    acc.missing.total += Number(row["สูญหายสะสม"] || 0);
+
+    acc.injured.today += Number(row["บาดเจ็บวันนี้"] || 0);
+    acc.injured.total += Number(row["บาดเจ็บสะสม"] || 0);
+
+    acc.all.today += Number(row["รวมวันนี้"] || 0);
+    acc.all.total += Number(row["รวมสะสม"] || 0);
+
+    return acc;
+  },
+  {
+    dead: { today: 0, total: 0 },
+    missing: { today: 0, total: 0 },
+    injured: { today: 0, total: 0 },
+    all: { today: 0, total: 0 },
+  }
+);
+
 
 
 
@@ -247,6 +273,8 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
     );
   }
 
+  console.log('Mapped Data:', mappedData);
+
   
 
   return (
@@ -260,14 +288,14 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
     >
       {/* Background Blobs */}
       <div
-        className="absolute -top-24 -left-24 w-80 h-80 sm:w-96 sm:h-96 bg-green-300 opacity-30 blur-3xl rounded-full"
+        className="absolute -top-24 -left-24 w-80 h-80 sm:w-96 sm:h-96 bg-blue-600 opacity-30 blur-3xl rounded-full"
         style={{
           animation: 'pulse 4s ease-in-out infinite',
           transform: 'translateZ(0)'
         }}
       />
       <div
-        className="absolute -bottom-24 -right-24 w-80 h-80 sm:w-96 sm:h-96 bg-teal-300 opacity-30 blur-3xl rounded-full"
+        className="absolute -bottom-24 -right-24 w-80 h-80 sm:w-96 sm:h-96 bg-teal-600 opacity-30 blur-3xl rounded-full"
         style={{
           animation: 'pulse 4s ease-in-out infinite 2s',
           transform: 'translateZ(0)'
@@ -296,18 +324,163 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
   animate="visible"
   style={{ transform: 'translateZ(0)', backfaceVisibility: 'hidden' }}
 >
-  {/* Row 1 - Unequal columns */}
-  <div className="bg-white/20 rounded-lg p-4 col-span-1">Item 1 (ยาวกว่า)</div>
+
+  {/* Row 1 - Equal columns */}
+  <div className="flex flex-col items-center gap-6 py-6">
+    <h2 className="text-2xl  font-bold mb-3 text-gray-800">
+      สถานการณ์จังหวัดพะเยา (สะสม)
+  </h2>
+      {/* แถวแรก: การ์ด */}
+      <motion.div
+        className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-5xl"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <StatCard
+          title="เสียชีวิต"
+          total={totals.dead.total}
+          today={totals.dead.today}
+          color="bg-red-300"
+        />
+        <StatCard
+          title="สูญหาย"
+          total={totals.missing.total}
+          today={totals.missing.today}
+          color="bg-yellow-300"
+        />
+        <StatCard
+          title="บาดเจ็บ"
+          total={totals.injured.total}
+          today={totals.injured.today}
+          color="bg-orange-300"
+        />
+        <StatCard
+          title="รวม"
+          total={totals.all.total}
+          today={totals.all.today}
+          color="bg-blue-300"
+        />
+      </motion.div>
+
+      {/* แถวสอง: ตาราง */}
+      <div className="w-full max-w-5xl overflow-x-auto">
+          {/* หัวตาราง */}
+  <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
+    📝 สถานการณ์แยกรายอำเภอ (สะสม)
+  </h2>
+
+  <table className="min-w-full border border-gray-300 rounded-xl shadow-md overflow-hidden">
+    <thead>
+      <tr className="bg-gradient-to-r from-blue-400 to-blue-200">
+        <th className="px-4 py-3 text-left border-b font-semibold text-gray-700">
+          อำเภอ
+        </th>
+        <th className="px-4 py-3 text-center border-b font-semibold text-gray-700">
+          เสียชีวิต
+        </th>
+        <th className="px-4 py-3 text-center border-b font-semibold text-gray-700">
+          สูญหาย
+        </th>
+        <th className="px-4 py-3 text-center border-b font-semibold text-gray-700">
+          บาดเจ็บ
+        </th>
+        <th className="px-4 py-3 text-center border-b font-semibold text-gray-700">
+          รวม
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {mappedData.map((row, index) => (
+        <tr
+          key={index}
+          className={`hover:bg-gray-50 transition ${
+            index % 2 === 0 ? "bg-white" : "bg-gray-50"
+          }`}
+        >
+          <td className="px-4 py-2 border-b">{row.อำเภอ}</td>
+
+          {/* เสียชีวิต = สีขาว (font เทาเข้ม) */}
+          <td className="px-4 py-2 border-b text-center bg-white font-semibold text-gray-800">
+            {row.เสียชีวิตสะสม}
+          </td>
+
+          {/* สูญหาย = สีแดงอ่อน */}
+          <td className="px-4 py-2 border-b text-center bg-red-100 font-semibold text-red-700">
+            {row.สูญหายสะสม}
+          </td>
+
+          {/* บาดเจ็บ = สีเหลืองอ่อน */}
+          <td className="px-4 py-2 border-b text-center bg-yellow-100 font-semibold text-yellow-800">
+            {row.บาดเจ็บสะสม}
+          </td>
+
+          {/* รวม = สีส้มอ่อน */}
+          <td className="px-4 py-2 border-b text-center font-bold bg-orange-100 text-orange-800">
+            {row.เสียชีวิตสะสม + row.สูญหายสะสม + row.บาดเจ็บสะสม}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+      </div>
+    </div>
+  
+
   <div className="bg-white/20 rounded-lg p-4 col-span-1">Item 2</div>
 
   {/* Row 2 - Equal columns */}
-  <div className="bg-white/20 rounded-lg p-4 col-span-1">Item 3</div>
+<div className="w-full max-w-5xl overflow-x-auto py-6">
+  <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
+    🚣🏽‍♂️  ทีมปฏิบัติการด้านการแพทย์และสาธารณสุข
+  </h2>
+
+  <table className="min-w-full border border-gray-300 rounded-xl shadow-md overflow-hidden">
+    <thead>
+      <tr className="bg-gradient-to-r from-green-400 to-green-200">
+        <th className="px-4 py-3 text-left border-b font-semibold text-gray-800">
+          ทีม
+        </th>
+        <th className="px-4 py-3 text-center border-b font-semibold text-gray-800">
+          จำนวน
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {["MERT", "Mini MERT", "SEhRT", "CDCU", "SRRT", "อื่นๆ (กู้ชีพ กู้ภัย)"].map((team, index) => {
+        const totalTeam = mappedData.reduce((sum, row) => {
+          return sum + Number(row[team] || 0);
+        }, 0);
+
+        // โทนสีสุขภาพ / หมอ
+    
+
+        return (
+          <tr
+            key={team}
+            className={`hover:bg-gray-50 transition ${
+              index % 2 === 0 ? "bg-white" : "bg-gray-50"
+            }`}
+          >
+            <td className="px-4 py-2 border-b font-semibold">{team}</td>
+            <td
+              className={`px-4 py-2 border-b text-center font-bold bg-green-50 text-green-700`}
+            >
+              {totalTeam}
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+
   <div className="bg-white/20 rounded-lg p-4 col-span-1">Item 4</div>
 
   {/* Row 3 - Equal columns */}
-  <div className="bg-white/20 rounded-lg p-4 col-span-1">Item 5</div>
+  <div className="bg-white/20 rounded-lg p-4 col-span-1 ">Item 5</div>
   <div className="bg-white/20 rounded-lg p-4 col-span-1">Item 6</div>
-</motion.div>
+     </motion.div>
       <div className="mt-8 sm:mt-12 pb-8"></div>
     </div>
   );

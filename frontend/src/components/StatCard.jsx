@@ -1,11 +1,16 @@
 import React from "react";
 
-export default function StatCard({ title, value, description, className = "" }) {
+export default function StatCard({ title, total, today, color }) {
   return (
-    <div className={`bg-white/50 backdrop-blur-sm p-4 rounded-lg shadow-lg flex-grow ${className}`}>
-    <h3 className="text text-sm font-medium">{title}</h3> {/* เปลี่ยนสีตัวอักษรให้เข้ากับ background */}
-    <p className="text-3xl font-bold text mt-1">{value}</p> {/* เปลี่ยนสีตัวอักษรให้เข้ากับ background */}
-    <p className="text text-xs mt-2">{description}</p> {/* เปลี่ยนสีตัวอักษรให้เข้ากับ background */}
-  </div>
+    <div
+      className={`rounded-2xl p-4 sm:p-6 shadow-lg text-center ${color}`}
+    
+    >
+      <p className="text-sm sm:text-base font-medium text-gray-700">{title}</p>
+      <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+        {total ?? "-"}
+      </h2>
+  
+    </div>
   );
 }
