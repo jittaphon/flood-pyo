@@ -318,7 +318,7 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
 
      <motion.div
   className="backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl sm:rounded-3xl shadow-2xl p-4 sm:p-6 w-full max-w-none mx-4
-             grid grid-cols-2 gap-4"
+            grid grid-cols-[1fr_1.5fr] gap-4 w-full gap-4"
   variants={containerVariants}
   initial="hidden"
   animate="visible"
@@ -326,13 +326,14 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
 >
 
   {/* Row 1 - Equal columns */}
-  <div className="flex flex-col items-center gap-6 py-6">
+  <div className="flex flex-col items-center gap-6 py-6  col-span-1 ">
+
     <h2 className="text-2xl  font-bold mb-3 text-gray-800">
       สถานการณ์จังหวัดพะเยา (สะสม)
   </h2>
       {/* แถวแรก: การ์ด */}
       <motion.div
-        className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-5xl"
+        className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full "
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -364,73 +365,111 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
       </motion.div>
 
       {/* แถวสอง: ตาราง */}
-      <div className="w-full max-w-5xl overflow-x-auto">
+      <div className="w-full  overflow-x-auto">
           {/* หัวตาราง */}
   <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
     📝 สถานการณ์แยกรายอำเภอ (สะสม)
   </h2>
 
-  <table className="min-w-full border border-gray-300 rounded-xl shadow-md overflow-hidden">
-    <thead>
-      <tr className="bg-gradient-to-r from-blue-400 to-blue-200">
-        <th className="px-4 py-3 text-left border-b font-semibold text-gray-700">
-          อำเภอ
-        </th>
-        <th className="px-4 py-3 text-center border-b font-semibold text-gray-700">
-          เสียชีวิต
-        </th>
-        <th className="px-4 py-3 text-center border-b font-semibold text-gray-700">
-          สูญหาย
-        </th>
-        <th className="px-4 py-3 text-center border-b font-semibold text-gray-700">
-          บาดเจ็บ
-        </th>
-        <th className="px-4 py-3 text-center border-b font-semibold text-gray-700">
-          รวม
-        </th>
+  <table className="min-w-full rounded-xl overflow-hidden shadow-xl backdrop-blur-xl bg-white/30 border border-white/20">
+  <thead>
+    <tr className="bg-gradient-to-r from-blue-500/80 to-blue-300/80 text-white">
+      <th className="px-4 py-3 text-left">อำเภอ</th>
+      <th className="px-4 py-3 text-center">เสียชีวิต</th>
+      <th className="px-4 py-3 text-center">สูญหาย</th>
+      <th className="px-4 py-3 text-center">บาดเจ็บ</th>
+      <th className="px-4 py-3 text-center">รวม</th>
+    </tr>
+  </thead>
+  <tbody>
+    {mappedData.map((row, index) => (
+      <tr
+        key={index}
+        className={`transition ${
+          index % 2 === 0 ? "bg-white/60" : "bg-white/40"
+        } hover:bg-blue-50 hover:shadow-lg`}
+      >
+        <td className="px-4 py-2 border-b">{row.อำเภอ}</td>
+        <td className="px-4 py-2 border-b text-center text-red-600 font-semibold">
+          {row.เสียชีวิตสะสม}
+        </td>
+        <td className="px-4 py-2 border-b text-center text-yellow-600 font-semibold">
+          {row.สูญหายสะสม}
+        </td>
+        <td className="px-4 py-2 border-b text-center text-orange-600 font-semibold">
+          {row.บาดเจ็บสะสม}
+        </td>
+        <td className="px-4 py-2 border-b text-center text-blue-700 font-bold">
+          {row.เสียชีวิตสะสม + row.สูญหายสะสม + row.บาดเจ็บสะสม}
+        </td>
       </tr>
-    </thead>
-    <tbody>
-      {mappedData.map((row, index) => (
-        <tr
-          key={index}
-          className={`hover:bg-gray-50 transition ${
-            index % 2 === 0 ? "bg-white" : "bg-gray-50"
-          }`}
-        >
-          <td className="px-4 py-2 border-b">{row.อำเภอ}</td>
+    ))}
+  </tbody>
+</table>
 
-          {/* เสียชีวิต = สีขาว (font เทาเข้ม) */}
-          <td className="px-4 py-2 border-b text-center bg-white font-semibold text-gray-800">
-            {row.เสียชีวิตสะสม}
-          </td>
-
-          {/* สูญหาย = สีแดงอ่อน */}
-          <td className="px-4 py-2 border-b text-center bg-red-100 font-semibold text-red-700">
-            {row.สูญหายสะสม}
-          </td>
-
-          {/* บาดเจ็บ = สีเหลืองอ่อน */}
-          <td className="px-4 py-2 border-b text-center bg-yellow-100 font-semibold text-yellow-800">
-            {row.บาดเจ็บสะสม}
-          </td>
-
-          {/* รวม = สีส้มอ่อน */}
-          <td className="px-4 py-2 border-b text-center font-bold bg-orange-100 text-orange-800">
-            {row.เสียชีวิตสะสม + row.สูญหายสะสม + row.บาดเจ็บสะสม}
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
       </div>
+
+
     </div>
-  
 
-  <div className="bg-white/20 rounded-lg p-4 col-span-1">Item 2</div>
-
+  <div className="bg-white/20 rounded-lg p-4 col-span-2">Item 2</div>
   {/* Row 2 - Equal columns */}
-<div className="w-full max-w-5xl overflow-x-auto py-6">
+<div className="w-full overflow-x-auto py-6 col-span-3 ">
+
+    <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
+      🏕️ การจัดตั้งศูนย์พักในพื้นที่ที่ได้รับผลกระทบ (สะสม)
+    </h2>
+
+    <table className="min-w-full rounded-xl overflow-hidden 
+                      shadow-lg bg-white/70 border border-gray-200">
+      <thead>
+        <tr className="bg-gradient-to-r from-amber-800/90 to-yellow-600/80 text-white shadow-md">
+          <th className="px-4 py-3 text-left">📍 อำเภอ</th>
+          {mappedData.map((row, index) => (
+            <th key={index} className="px-4 py-3 text-center">
+              {row.อำเภอ}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {/* แถว 1: จำนวนผู้พักพิง */}
+        <tr className="bg-white/60 hover:bg-yellow-50 transition">
+          <td className="px-4 py-2 border-b font-semibold text-gray-800">
+            👨‍👩‍👧‍👦 จำนวนผู้พักพิง
+          </td>
+          {mappedData.map((row, index) => (
+            <td
+              key={index}
+              className="px-4 py-2 border-b text-center text-emerald-700 font-semibold"
+            >
+              {row.จำนวนผู้พักพิง || 0}
+            </td>
+          ))}
+        </tr>
+
+        {/* แถว 2: จำนวนศูนย์พักพิง */}
+        <tr className="bg-white/40 hover:bg-yellow-50 transition">
+          <td className="px-4 py-2 border-b font-semibold text-gray-800">
+            🏠 จำนวนศูนย์พักพิง
+          </td>
+          {mappedData.map((row, index) => (
+            <td
+              key={index}
+              className="px-4 py-2 border-b text-center text-blue-700 font-semibold"
+            >
+              {row.จำนวนศูนย์พักพิง || 0}
+            </td>
+          ))}
+        </tr>
+      </tbody>
+    </table>
+
+</div>
+
+
+  {/* Row 3 - Equal columns */}
+<div className="w-full max-w-5xl overflow-x-auto py-6 col-span-1">
   <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
     🚣🏽‍♂️  ทีมปฏิบัติการด้านการแพทย์และสาธารณสุข
   </h2>
@@ -456,15 +495,57 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
     
 
         return (
-          <tr
-            key={team}
-            className={`hover:bg-gray-50 transition ${
-              index % 2 === 0 ? "bg-white" : "bg-gray-50"
-            }`}
+          <tr key={team}
+            className={`transition ${
+          index % 2 === 0 ? "bg-white/60" : "bg-white/40"
+        } hover:bg-green-50 hover:shadow-lg`}
           >
             <td className="px-4 py-2 border-b font-semibold">{team}</td>
             <td
-              className={`px-4 py-2 border-b text-center font-bold bg-green-50 text-green-700`}
+              className={`px-4 py-2 border-b text-center font-bold `}
+            >
+              {totalTeam}
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
+<div className="w-full overflow-x-auto py-6 col-span-2">
+  <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
+    🚣🏽‍♂️  จำนวนผู้รับบริการด้านการเเพทย์เเละสาธารณสุข (สะสม)
+  </h2>
+
+  <table className="min-w-full border border-gray-300 rounded-xl shadow-md overflow-hidden">
+    <thead>
+      <tr className="bg-gradient-to-r from-green-400 to-green-200">
+        <th className="px-4 py-3 text-left border-b font-semibold text-gray-800">
+          ทีม
+        </th>
+        <th className="px-4 py-3 text-center border-b font-semibold text-gray-800">
+          จำนวน
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {["MERT", "Mini MERT", "SEhRT", "CDCU", "SRRT", "อื่นๆ (กู้ชีพ กู้ภัย)"].map((team, index) => {
+        const totalTeam = mappedData.reduce((sum, row) => {
+          return sum + Number(row[team] || 0);
+        }, 0);
+
+        // โทนสีสุขภาพ / หมอ
+    
+
+        return (
+          <tr key={team}
+            className={`transition ${
+          index % 2 === 0 ? "bg-white/60" : "bg-white/40"
+        } hover:bg-green-50 hover:shadow-lg`}
+          >
+            <td className="px-4 py-2 border-b font-semibold">{team}</td>
+            <td
+              className={`px-4 py-2 border-b text-center font-bold `}
             >
               {totalTeam}
             </td>
@@ -475,13 +556,16 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
   </table>
 </div>
 
-  <div className="bg-white/20 rounded-lg p-4 col-span-1">Item 4</div>
+
+
+
+
+
+
 
   {/* Row 3 - Equal columns */}
-  <div className="bg-white/20 rounded-lg p-4 col-span-1 ">Item 5</div>
-  <div className="bg-white/20 rounded-lg p-4 col-span-1">Item 6</div>
      </motion.div>
-      <div className="mt-8 sm:mt-12 pb-8"></div>
+  <div className="mt-8 sm:mt-12 pb-8"></div>
     </div>
   );
 }
