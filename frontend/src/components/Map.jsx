@@ -49,7 +49,19 @@ export default function PhayaoMap() {
   const [geoData, setGeoData] = useState(null);
   const [riskData, setRiskData] = useState([]);
   const [geoDataWithRisk, setGeoDataWithRisk] = useState(null);
+  const [nowTime, setNowTime] = useState(new Date());
+  // อัพเดทเวลา real-time ทุก 1 นาที
+  useEffect(() => {
+    const interval = setInterval(() => setNowTime(new Date()), 60000);
+    return () => clearInterval(interval);
+  }, []);
 
+  const formatDateTime = (date) => {
+    return date.toLocaleString("th-TH", {
+      dateStyle: "long",
+      timeStyle: "short"
+    });
+  };
     
 function getTmdStarttime() {
   const now = new Date();
@@ -110,12 +122,12 @@ function getTmdStarttime() {
               domain: 2,
               province: "พะเยา",
               amphoe,
-              fields: "rain,cond",
+              fields: "rain,cond,tc",
               starttime: tmdStarttime,
             }
           });
           const data = response.data.WeatherForecasts[0].forecasts[0].data;
-          return { amphoe, rain: data.rain, cond: data.cond, risk: floodRisk(data.rain, data.cond) };
+          return { amphoe, rain: data.rain, cond: data.cond, risk: floodRisk(data.rain, data.cond) , tc: data.tc};
         } catch (error) {
           console.error(amphoe, error);
           return { amphoe, rain: 0, cond: 0, risk: "ไม่มีข้อมูล" };
@@ -138,7 +150,8 @@ function getTmdStarttime() {
             ...f.properties,
             rain: riskMap[amp]?.rain ?? 0,
             cond: riskMap[amp]?.cond ?? 0,
-            risk: riskMap[amp]?.risk ?? "ไม่มีข้อมูล"
+            risk: riskMap[amp]?.risk ?? "ไม่มีข้อมูล",
+            tc: riskMap[amp]?.tc ?? 0
           }
         };
       });
@@ -167,7 +180,7 @@ function getTmdStarttime() {
   const onEachFeature = (feature, layer) => {
     const props = feature.properties;
     layer.bindTooltip(
-      `${props.amp_th} <br/>ฝน: ${props.rain} mm <br/>Cond: ${props.cond} <br/>Risk: ${props.risk}`,
+      `${props.amp_th} <br/>ฝน: ${props.rain} mm <br/>Cond: ${props.cond} <br/>Risk: ${props.risk} <br/>ความร้อน: ${props.tc} °C`,
       { permanent: false, direction: "top", sticky: true, className: "map-label" }
     );
     layer.on({
@@ -178,11 +191,47 @@ function getTmdStarttime() {
 
   return (
     <div className="w-full max-w-5xl mx-auto mt-2 p-4">
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+  {/* เวลา */}
+  <div className="p-6 rounded-2xl border border-white/40 bg-white/30 shadow-xl backdrop-blur-md">
+    <div className="text-xs uppercase tracking-wide text-gray-600 mb-1">
+      เวลาอัปเดต
+    </div>
+    <div className="text-xl font-semibold text-gray-900">
+      {formatDateTime(nowTime)}
+    </div>
+  </div>
+
+{/* ปริมาณน้ำฝน (mock) */}
+<div
+  className={`
+    p-6 rounded-2xl border border-white/30 shadow-xl backdrop-blur-md text-white relative overflow-hidden
+    animate-gradient bg-gradient-to-tr from-blue-400 via-blue-600 to-indigo-800
+  `}
+>
+  <div className="text-xs uppercase tracking-wide text-white/80 mb-1">
+    ปริมาณน้ำฝน
+  </div>
+  <div className="flex items-baseline gap-2">
+    <span className="text-2xl">🌧</span>
+    <span className="text-2xl font-semibold">35 mm</span>
+  </div>
+  <div className="text-sm mt-1">
+    ภายใน 24 ชั่วโมงที่ผ่านมา
+  </div>
+
+  {/* เอฟเฟกต์น้ำเป็น overlay */}
+  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/waves.png')] animate-water"></div>
+</div>
+</div>
+
+
       <div className="rounded-xl overflow-hidden shadow-lg border border-gray-200">
         <MapContainer
           center={[19.169, 99.905]}
           zoom={10}
-          style={{ height: "650px", width: "100%" }}
+          style={{ height: "500px", width: "100%" }}
           dragging={false}
           zoomControl={false}
           doubleClickZoom={false}
