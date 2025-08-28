@@ -3,7 +3,7 @@ import React from "react";
 import Papa from 'papaparse';
 import { motion } from "framer-motion";
 import StatCard from "../components/StatCard"; // 👈 import ที่ทำไว้ด้านบน
-
+import PhayaoMap from "../components/Map";
 export default function HomePage() {
   const [rawData, setRawData] = useState([]);
   const [processedData, setProcessedData] = useState([]);
@@ -106,7 +106,7 @@ const columnMap = {
   BQ: "ให้สุขศึกษา",
   BR: "สุขภาพจิต",
   BS: "ส่งต่อ",
-  BT: "มอบชุดดูแล สิ่งแวดล้อม/ V-clean",
+  BT: "มอบชุดดูแลสิ่งแวดล้อมV_clean",
   BU: "มอบชุดยาเวชภัณฑ์",
   BV: "leptospirosis_today",
   BW: "leptospirosis_accumulated",
@@ -273,10 +273,7 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
     );
   }
 
-  console.log('Mapped Data:', mappedData);
-
   
-
   return (
     <div
       className="relative min-h-screen flex flex-col items-center justify-start pt-8 sm:pt-16 md:pt-20 px-4 sm:px-6 bg-gradient-to-br from-blue-50 to-white overflow-hidden"
@@ -313,7 +310,7 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
           backfaceVisibility: 'hidden'
         }}
       >
-        รายงานสถานการณ์อุทกภัย ระดับอำเภอ ประจำปีงบประมาณ 2568
+       🌧️ รายงานสถานการณ์อุทกภัย ระดับอำเภอ ประจำปีงบประมาณ 2568
       </motion.h1>
 
      <motion.div
@@ -387,7 +384,7 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
         key={index}
         className={`transition ${
           index % 2 === 0 ? "bg-white/60" : "bg-white/40"
-        } hover:bg-blue-50 hover:shadow-lg`}
+        } hover:bg-blue-200 hover:shadow-lg`}
       >
         <td className="px-4 py-2 border-b">{row.อำเภอ}</td>
         <td className="px-4 py-2 border-b text-center text-red-600 font-semibold">
@@ -412,7 +409,9 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
 
     </div>
 
-  <div className="bg-white/20 rounded-lg p-4 col-span-2">Item 2</div>
+  <div className="bg-white/20 rounded-lg p-4 col-span-2">
+    <PhayaoMap />
+  </div>
   {/* Row 2 - Equal columns */}
 <div className="w-full overflow-x-auto py-6 col-span-3 ">
 
@@ -434,7 +433,7 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
       </thead>
       <tbody>
         {/* แถว 1: จำนวนผู้พักพิง */}
-        <tr className="bg-white/60 hover:bg-yellow-50 transition">
+        <tr className="bg-white/60 hover:bg-yellow-200 transition">
           <td className="px-4 py-2 border-b font-semibold text-gray-800">
             👨‍👩‍👧‍👦 จำนวนผู้พักพิง
           </td>
@@ -449,7 +448,7 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
         </tr>
 
         {/* แถว 2: จำนวนศูนย์พักพิง */}
-        <tr className="bg-white/40 hover:bg-yellow-50 transition">
+        <tr className="bg-white/40 hover:bg-yellow-200 transition">
           <td className="px-4 py-2 border-b font-semibold text-gray-800">
             🏠 จำนวนศูนย์พักพิง
           </td>
@@ -467,8 +466,91 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
 
 </div>
 
-
   {/* Row 3 - Equal columns */}
+<div className="w-full overflow-x-auto py-6 col-span-3">
+  <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
+   🧍 จำนวนผู้รับบริการด้านการเเพทย์เเละสาธารณสุข (สะสม)
+  </h2>
+
+<table className="min-w-full rounded-xl overflow-hidden backdrop-blur-xl bg-white/30 border border-white/20">
+  <thead>
+    <tr className="bg-gradient-to-r from-blue-500/80 to-blue-300/80 text-white">
+      <th className="px-4 py-3 text-left">อำเภอ</th>
+      <th className="px-4 py-3 text-center">เยี่ยมบ้าน</th>
+      <th className="px-4 py-3 text-center">ตรวจรักษา</th>
+      <th className="px-4 py-3 text-center">ให้สุขศึกษา</th>
+      <th className="px-4 py-3 text-center">สุขภาพจิต</th>
+      <th className="px-4 py-3 text-center">ส่งต่อ</th>
+      <th className="px-4 py-3 text-center">มอบชุดดูแล สิ่งแวดล้อม/ V-clean</th>
+      <th className="px-4 py-3 text-center">มอบชุดยาเวชภัณฑ์</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {mappedData.map((row, index) => (
+      <tr
+        key={index}
+        className={`transition ${
+          index % 2 === 0 ? "bg-white/60" : "bg-white/40"
+        } hover:bg-blue-200 hover:shadow-lg`}
+      >
+        <td className="px-4 py-2 border-b">{row.อำเภอ}</td>
+        <td className="px-4 py-2 border-b text-center font-semibold">
+          {row.เยี่ยมบ้าน}
+        </td>
+        <td className="px-4 py-2 border-b text-center font-semibold">
+          {row.ตรวจรักษา}
+        </td>
+        <td className="px-4 py-2 border-b text-center font-semibold">
+          {row.ให้สุขศึกษา}
+        </td>
+        <td className="px-4 py-2 border-b text-center font-semibold">
+          {row.สุขภาพจิต}
+        </td>
+        <td className="px-4 py-2 border-b text-center font-semibold">
+          {row.ส่งต่อ}
+        </td>
+        <td className="px-4 py-2 border-b text-center font-semibold">
+          {row.มอบชุดดูแลสิ่งแวดล้อมV_clean}
+        </td>
+        <td className="px-4 py-2 border-b text-center font-semibold">
+          {row.มอบชุดยาเวชภัณฑ์}
+        </td>
+      </tr>
+    ))}
+  </tbody>
+
+  {/* ส่วนสรุปผลรวม */}
+  <tfoot>
+    <tr className="bg-gradient-to-r from-blue-400/70 to-blue-200/70 font-bold text-gray-900">
+      <td className="px-4 py-2 text-left">รวม</td>
+      <td className="px-4 py-2 text-center">
+        {mappedData.reduce((sum, row) => sum + (Number(row.เยี่ยมบ้าน) || 0), 0)}
+      </td>
+      <td className="px-4 py-2 text-center">
+        {mappedData.reduce((sum, row) => sum + (Number(row.ตรวจรักษา) || 0), 0)}
+      </td>
+      <td className="px-4 py-2 text-center">
+        {mappedData.reduce((sum, row) => sum + (Number(row.ให้สุขศึกษา) || 0), 0)}
+      </td>
+      <td className="px-4 py-2 text-center">
+        {mappedData.reduce((sum, row) => sum + (Number(row.สุขภาพจิต) || 0), 0)}
+      </td>
+      <td className="px-4 py-2 text-center">
+        {mappedData.reduce((sum, row) => sum + (Number(row.ส่งต่อ) || 0), 0)}
+      </td>
+      <td className="px-4 py-2 text-center">
+        {mappedData.reduce((sum, row) => sum + (Number(row.มอบชุดดูแลสิ่งแวดล้อมV_clean) || 0), 0)}
+      </td>
+      <td className="px-4 py-2 text-center">
+        {mappedData.reduce((sum, row) => sum + (Number(row.มอบชุดยาเวชภัณฑ์) || 0), 0)}
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+</div>
+  {/* Row 4 - Equal columns */}
 <div className="w-full max-w-5xl overflow-x-auto py-6 col-span-1">
   <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
     🚣🏽‍♂️  ทีมปฏิบัติการด้านการแพทย์และสาธารณสุข
@@ -498,50 +580,7 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
           <tr key={team}
             className={`transition ${
           index % 2 === 0 ? "bg-white/60" : "bg-white/40"
-        } hover:bg-green-50 hover:shadow-lg`}
-          >
-            <td className="px-4 py-2 border-b font-semibold">{team}</td>
-            <td
-              className={`px-4 py-2 border-b text-center font-bold `}
-            >
-              {totalTeam}
-            </td>
-          </tr>
-        );
-      })}
-    </tbody>
-  </table>
-</div>
-<div className="w-full overflow-x-auto py-6 col-span-2">
-  <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
-    🚣🏽‍♂️  จำนวนผู้รับบริการด้านการเเพทย์เเละสาธารณสุข (สะสม)
-  </h2>
-
-  <table className="min-w-full border border-gray-300 rounded-xl shadow-md overflow-hidden">
-    <thead>
-      <tr className="bg-gradient-to-r from-green-400 to-green-200">
-        <th className="px-4 py-3 text-left border-b font-semibold text-gray-800">
-          ทีม
-        </th>
-        <th className="px-4 py-3 text-center border-b font-semibold text-gray-800">
-          จำนวน
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      {["MERT", "Mini MERT", "SEhRT", "CDCU", "SRRT", "อื่นๆ (กู้ชีพ กู้ภัย)"].map((team, index) => {
-        const totalTeam = mappedData.reduce((sum, row) => {
-          return sum + Number(row[team] || 0);
-        }, 0);
-
-        // โทนสีสุขภาพ / หมอ
-    
-
-        return (
-          <tr key={team}
-            className={`transition ${
-          index % 2 === 0 ? "bg-white/60" : "bg-white/40"
-        } hover:bg-green-50 hover:shadow-lg`}
+        } hover:bg-green-200 hover:shadow-lg`}
           >
             <td className="px-4 py-2 border-b font-semibold">{team}</td>
             <td

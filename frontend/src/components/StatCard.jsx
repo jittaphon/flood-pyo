@@ -20,12 +20,12 @@ export default function StatCard({ title, total, today, color }) {
     >
       <div className="flex items-center gap-2 mb-2">
         {iconMap[title]}
-        <h3 className="text-lg">{title}</h3>
+        <h3 className="text-lg text-gray-900 drop-shadow">{title}</h3>
       </div>
-      <p className="text-3xl sm:text-4xl">{total}</p>
+      <p className="text-3xl sm:text-4xl text-black drop-shadow">{total}</p>
       {today > 0 && (
-        <p className="text-sm font-medium mt-1 text-white/80">+{today} วันนี้</p>
-      )}
+  <p className="text-sm font-medium mt-1 text-gray-700">+{today} วันนี้</p>
+)}
     </motion.div>
   );
 }
