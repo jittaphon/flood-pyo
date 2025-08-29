@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import React from "react";
 import L from "leaflet";
 import axios from "axios";
-
+import ProvinceCard from "../components/ProvinceCard";
 // FitBounds: ซูมให้ครอบจังหวัดพะเยา
 function FitBounds({ geoData }) {
   const map = useMap();
@@ -27,10 +27,10 @@ function Legend() {
       div.innerHTML = `
         <div class="font-bold mb-1">คำอธิบาย</div>
         <div class="flex items-center gap-2 mb-1">
-          <span class="w-4 h-4 inline-block rounded bg-red-500"></span> เสี่ยง
+          <span class="w-4 h-4 inline-block rounded bg-red-500"></span> พื้นที่เสี่ยงฝนตกหนักมาก
         </div>
         <div class="flex items-center gap-2 mb-1">
-          <span class="w-4 h-4 inline-block rounded bg-yellow-400"></span> ระวัง
+          <span class="w-4 h-4 inline-block rounded bg-yellow-400"></span> พื้นที่เสี่ยงฝนตกหนัก
         </div>
         <div class="flex items-center gap-2">
           <span class="w-4 h-4 inline-block rounded bg-green-500"></span> ปลอดภัย
@@ -48,6 +48,7 @@ export default function PhayaoMap() {
   const amphoes = ["ดอกคำใต้","จุน","เชียงคำ","ปง","ภูซาง","แม่ใจ","ภูกามยาว","เชียงม่วน"];
   const [geoData, setGeoData] = useState(null);
   const [riskData, setRiskData] = useState([]);
+  const [ProvinceData, setProvinceData] = useState([]);
   const [geoDataWithRisk, setGeoDataWithRisk] = useState(null);
   const [nowTime, setNowTime] = useState(new Date());
   // อัพเดทเวลา real-time ทุก 1 นาที
@@ -56,12 +57,13 @@ export default function PhayaoMap() {
     return () => clearInterval(interval);
   }, []);
 
-  const formatDateTime = (date) => {
-    return date.toLocaleString("th-TH", {
-      dateStyle: "long",
-      timeStyle: "short"
-    });
-  };
+ const formatDateTime = (date) => {
+  return date.toLocaleDateString("th-TH", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+};
     
 function getTmdStarttime() {
   const now = new Date();
@@ -86,11 +88,11 @@ function getTmdStarttime() {
 }
 
 
-  function floodRisk(rain, cond) {
+  /*function floodRisk(rain, cond) {
     if (rain >= 30 || cond >= 7) return "เสี่ยง";
     if (rain >= 10 || (cond >= 5 && cond <= 6)) return "ระวัง";
     return "ปลอดภัย";
-  }
+  }*/
 
   // โหลด GeoJSON เฉพาะพะเยา
   useEffect(() => {
@@ -106,37 +108,29 @@ function getTmdStarttime() {
   }, []);
 
   // ดึงข้อมูลฝนจาก TMD
-  useEffect(() => {
-    const fetchAll = async () => {
-      const tmdStarttime = getTmdStarttime();
+useEffect(() => {
+  const fetchAll = async () => {
+    const tmdStarttime = getTmdStarttime();
 
-      console.log("Fetching TMD data for starttime:", tmdStarttime);
-      const results = await Promise.all(amphoes.map(async (amphoe) => {
-        try {
-          const response = await axios.get(`https://data.tmd.go.th/nwpapi/v1/forecast/area/place`, {
-            headers: { 
-              accept: "application/json",
-              authorization: import.meta.env.VITE_API_WEATHER
-            },
-            params: {
-              domain: 2,
-              province: "พะเยา",
-              amphoe,
-              fields: "rain,cond,tc",
-              starttime: tmdStarttime,
-            }
-          });
-          const data = response.data.WeatherForecasts[0].forecasts[0].data;
-          return { amphoe, rain: data.rain, cond: data.cond, risk: floodRisk(data.rain, data.cond) , tc: data.tc};
-        } catch (error) {
-          console.error(amphoe, error);
-          return { amphoe, rain: 0, cond: 0, risk: "ไม่มีข้อมูล" };
-        }
-      }));
-      setRiskData(results);
-    };
-    fetchAll();
-  }, []);
+    console.log("Fetching data from backend for starttime:", tmdStarttime);
+    try {
+      const response = await axios.get(`https://pyo.moph.go.th/datahub/flood-pyo/backend/public/index.php/api/v1/weather/getweather`, {
+        params: { starttime: tmdStarttime }
+      });
+      const response2 = await axios.get(`https://pyo.moph.go.th/datahub/flood-pyo/backend/public/index.php/api/v1/weather/getweatherOfProvince`, {
+        params: { starttime: tmdStarttime }
+      });
+      setProvinceData(response2.data);  
+      setRiskData(response.data);
+    } catch (error) {
+      console.error("Error fetching weather data:", error);
+      setRiskData([]);
+      setProvinceData([]);
+    }
+  };
+  fetchAll();
+}, []);
+
 
   // merge riskData เข้า geoData
   useEffect(() => {
@@ -162,8 +156,8 @@ function getTmdStarttime() {
   // style polygon ตาม risk
   const getColor = (risk) => {
     switch (risk) {
-      case "เสี่ยง": return "#ef4444";
-      case "ระวัง": return "#facc15";
+      case "พื้นที่เสี่ยงฝนตกหนักมาก": return "#ef4444";
+      case "พื้นที่เสี่ยงฝนตกหนัก": return "#facc15";
       case "ปลอดภัย": return "#22c55e";
       default: return "#9ca3af";
     }
@@ -180,7 +174,7 @@ function getTmdStarttime() {
   const onEachFeature = (feature, layer) => {
     const props = feature.properties;
     layer.bindTooltip(
-      `${props.amp_th} <br/>ฝน: ${props.rain} mm <br/>Cond: ${props.cond} <br/>Risk: ${props.risk} <br/>ความร้อน: ${props.tc} °C`,
+      `${props.amp_th} <br/>ฝน: ${props.rain} mm <br/>เมฆ: ${props.cond}  <br/>ความร้อน: ${props.tc} °C <br/>Risk: ${props.risk}`,
       { permanent: false, direction: "top", sticky: true, className: "map-label" }
     );
     layer.on({
@@ -193,37 +187,26 @@ function getTmdStarttime() {
     <div className="w-full max-w-5xl mx-auto mt-2 p-4">
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-  {/* เวลา */}
-  <div className="p-6 rounded-2xl border border-white/40 bg-white/30 shadow-xl backdrop-blur-md">
-    <div className="text-xs uppercase tracking-wide text-gray-600 mb-1">
-      เวลาอัปเดต
-    </div>
-    <div className="text-xl font-semibold text-gray-900">
-      {formatDateTime(nowTime)}
-    </div>
+{/* วันที่ */}
+<div className="p-6 rounded-2xl border border-white/40 bg-gradient-to-tr from-blue-300 via-white/30 to-white/50 shadow-lg backdrop-blur-md flex flex-col items-center justify-center text-center">
+  <div className="text-xs uppercase tracking-wide text-gray-600 mb-2">
+    ข้อมูล ประจำวันที่
   </div>
-
-{/* ปริมาณน้ำฝน (mock) */}
-<div
-  className={`
-    p-6 rounded-2xl border border-white/30 shadow-xl backdrop-blur-md text-white relative overflow-hidden
-    animate-gradient bg-gradient-to-tr from-blue-400 via-blue-600 to-indigo-800
-  `}
->
-  <div className="text-xs uppercase tracking-wide text-white/80 mb-1">
-    ปริมาณน้ำฝน
+  <div className="text-2xl sm:text-3xl font-bold text-gray-900">
+    {formatDateTime(nowTime)}
   </div>
-  <div className="flex items-baseline gap-2">
-    <span className="text-2xl">🌧</span>
-    <span className="text-2xl font-semibold">35 mm</span>
-  </div>
-  <div className="text-sm mt-1">
-    ภายใน 24 ชั่วโมงที่ผ่านมา
-  </div>
-
-  {/* เอฟเฟกต์น้ำเป็น overlay */}
-  <div className="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/waves.png')] animate-water"></div>
 </div>
+
+
+
+{/* Card สภาพอากาศประจำจังหวัด */}
+
+
+ <ProvinceCard data={ProvinceData}/>
+
+
+
+
 </div>
 
 
@@ -231,7 +214,7 @@ function getTmdStarttime() {
         <MapContainer
           center={[19.169, 99.905]}
           zoom={10}
-          style={{ height: "500px", width: "100%" }}
+          style={{ height: "420px", width: "100%" }}
           dragging={false}
           zoomControl={false}
           doubleClickZoom={false}

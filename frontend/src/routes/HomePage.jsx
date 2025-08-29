@@ -132,6 +132,8 @@ const mappedData = processedData.map(row => {
   return newRow;
 });
 
+
+
 // ✅ รวมค่าทุกอำเภอทั้ง วันนี้ + สะสม
 const totals = mappedData.reduce(
   (acc, row) => {
@@ -550,8 +552,9 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
 </table>
 
 </div>
+
   {/* Row 4 - Equal columns */}
-<div className="w-full max-w-5xl overflow-x-auto py-6 col-span-1">
+<div className="w-full overflow-x-auto py-6 col-span-1">
   <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
     🚣🏽‍♂️  ทีมปฏิบัติการด้านการแพทย์และสาธารณสุข
   </h2>
@@ -594,6 +597,60 @@ const cleanHeaders = headers.map((header, index) => indexToLetter(index));
     </tbody>
   </table>
 </div>
+
+{/* Row 4 - Equal columns */}
+<div className="w-full overflow-x-auto py-6 col-span-1">
+  <h2 className="text-lg sm:text-xl font-bold mb-3 text-gray-800">
+     🏥 จำนวนหน่วยบริการที่ได้รับผลกระทบ (สะสม)
+  </h2>
+
+  <table className="min-w-full border border-gray-300 rounded-xl shadow-md overflow-hidden">
+    <thead>
+      <tr className="bg-gradient-to-r from-green-400 to-green-200">
+        <th className="px-4 py-3 text-left border-b font-semibold text-gray-800">
+          หน่วยบริการ
+        </th>
+        <th className="px-4 py-3 text-center border-b font-semibold text-gray-800">
+          จำนวน
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      {(() => {
+        const labelMap = {
+          "รพสะสม": "โรงพยาบาล",
+          "รพสตสะสม": "รพ.สต.",
+          "สสอสะสม": "สสอ"
+        };
+
+        return ["รพสะสม", "รพสตสะสม", "สสอสะสม"].map((team, index) => {
+          const totalTeam = mappedData.reduce(
+            (sum, row) => sum + Number(row[team] || 0),
+            0
+          );
+
+          return (
+            <tr
+              key={team}
+              className={`transition ${
+                index % 2 === 0 ? "bg-white/60" : "bg-white/40"
+              } hover:bg-green-200 hover:shadow-lg`}
+            >
+              <td className="px-4 py-7 border-b font-semibold">
+                {labelMap[team] || team}
+              </td>
+              <td className="px-4 py-2 border-b text-center font-bold">
+                {totalTeam}
+              </td>
+            </tr>
+          );
+        });
+      })()}
+    </tbody>
+  </table>
+</div>
+
+
 
 
 
