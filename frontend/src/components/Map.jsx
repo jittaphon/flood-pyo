@@ -67,9 +67,11 @@ export default function PhayaoMap() {
     
 function getTmdStarttime() {
   const now = new Date();
-  let slot = Math.ceil(now.getHours() / 3) * 3;
 
-  // ถ้า slot = 24 → ไปวันถัดไป 00:00
+  // ปัดขึ้นเป็นชั่วโมงถัดไป
+  let slot = now.getHours() + 1;
+
+  // ถ้าเลย 23 → ข้ามไปวันถัดไป 00:00
   if (slot === 24) {
     slot = 0;
     now.setDate(now.getDate() + 1);
@@ -86,6 +88,7 @@ function getTmdStarttime() {
 
   return `${yyyy}-${mm}-${dd}T${hh}:${min}:${ss}`;
 }
+
 
 
   /*function floodRisk(rain, cond) {
@@ -112,7 +115,7 @@ useEffect(() => {
   const fetchAll = async () => {
     const tmdStarttime = getTmdStarttime();
 
-    console.log("Fetching data from backend for starttime:", tmdStarttime);
+    console.log(" starttime:", tmdStarttime);
     try {
       const response = await axios.get(`https://pyo.moph.go.th/datahub/flood-pyo/backend/public/index.php/api/v1/weather/getweather`, {
         params: { starttime: tmdStarttime }

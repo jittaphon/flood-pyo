@@ -21,8 +21,6 @@ const getWeatherInfo = (cond) => {
 
 export default function ProvinceCard({data}) {
 
-    console.log("Province Data:", data);
-
 
 const weather = getWeatherInfo(data.cond);
 

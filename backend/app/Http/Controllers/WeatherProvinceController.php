@@ -25,7 +25,7 @@ class WeatherProvinceController extends Controller
 
         $url = "https://data.tmd.go.th/nwpapi/v1/forecast/area/place";
         $query = http_build_query([
-            "domain" => 1,
+            "domain" => 2,
             "province" => $province,
             "fields" => "rain,cond,tc,rh,slp,ws10m,wd10m",
         ]) . "&starttime=" . $starttime;
